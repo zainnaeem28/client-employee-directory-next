@@ -10,6 +10,7 @@ import Input from './ui/Input';
 import Select from './ui/Select';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 const employeeSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50, 'First name must be less than 50 characters'),
@@ -161,11 +162,16 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
       }
       onSuccess();
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle other API errors
       console.error('Error saving employee:', error);
-      if (error?.response?.data?.message) {
-        setEmailError(error.response.data.message);
+      if (
+        error &&
+        typeof error === 'object' &&
+        (error as AxiosError).isAxiosError &&
+        (error as AxiosError<{ message?: string }>).response?.data?.message
+      ) {
+        setEmailError((error as AxiosError<{ message?: string }>).response!.data!.message!);
       }
       // Log the data being sent for debugging
       if (employee) {

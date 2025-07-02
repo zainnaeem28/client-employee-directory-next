@@ -1,10 +1,12 @@
 import axios from 'axios';
 import { Employee, CreateEmployeeDto, UpdateEmployeeDto, EmployeeFilters, PaginatedEmployees } from '@/types/employee';
 
+// Use proxy in production to avoid CORS issues
+const isProduction = process.env.NODE_ENV === 'production';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 const api = axios.create({
-  baseURL: `${API_BASE_URL.replace(/\/$/, '')}/api/v1`,
+  baseURL: isProduction ? '/api/proxy' : `${API_BASE_URL.replace(/\/$/, '')}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
   },

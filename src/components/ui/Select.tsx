@@ -16,9 +16,12 @@ const Select: React.FC<SelectProps> = ({
   className = '',
   ...props
 }) => {
-  const baseClasses = 'block w-full px-3 py-3 space-y-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-600 placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500';
+  // Conditionally set text color: gray-400 for placeholder, gray-900 for selected
+  const isPlaceholder = !props.value;
+  const baseClasses = 'block w-full px-3 py-3 space-y-2 border border-gray-300 rounded-md shadow-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500';
   const errorClasses = error ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : '';
-  const classes = `${baseClasses} ${errorClasses} ${className}`;
+  const textColor = isPlaceholder ? 'text-gray-400' : 'text-gray-900';
+  const classes = `${baseClasses} ${errorClasses} ${textColor} ${className}`;
 
   return (
     <div className="space-y-2">
@@ -38,7 +41,10 @@ const Select: React.FC<SelectProps> = ({
         disabled={props.disabled}
         required={props.required}
       >
-        <option value="">Select an option</option>
+        {/* Placeholder option: disabled and hidden when a value is selected */}
+        <option value="" disabled hidden>
+          Select an option
+        </option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
@@ -57,7 +63,7 @@ const Select: React.FC<SelectProps> = ({
       {helperText && !error && (
         <p className="text-sm text-gray-500">{helperText}</p>
       )}
-    <div className="space-y-2"></div>
+      <div className="space-y-2"></div>
     </div>
   );
 };

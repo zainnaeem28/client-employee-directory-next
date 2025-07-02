@@ -9,6 +9,7 @@ import Button from './ui/Button';
 import Input from './ui/Input';
 import Select from './ui/Select';
 import { X } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const employeeSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50, 'First name must be less than 50 characters'),
@@ -141,9 +142,11 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
         if (cleanData.manager !== employee.manager) updateData.manager = cleanData.manager || undefined;
         
         await employeeApi.update(employee.id, updateData);
+        toast.success('Employee updated successfully!');
       } else {
         // CREATE OPERATION: Send all required fields
         await employeeApi.create(cleanData as CreateEmployeeDto);
+        toast.success('Employee added successfully!');
       }
       onSuccess();
       onClose();

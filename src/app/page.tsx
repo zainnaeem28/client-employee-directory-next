@@ -11,6 +11,8 @@ import EmployeeFiltersComponent from '@/components/EmployeeFilters';
 import Pagination from '@/components/Pagination';
 import Button from '@/components/ui/Button';
 import Header from '@/components/Header';
+import ConfirmModal from '@/components/ConfirmModal';
+import toast from 'react-hot-toast';
 
 export default function Home() {
   const [employees, setEmployees] = useState<PaginatedEmployees | null>(null);
@@ -22,6 +24,7 @@ export default function Home() {
     page: 1,
     limit: 10,
   });
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const loadEmployees = useCallback(async () => {
     try {
@@ -59,16 +62,20 @@ export default function Home() {
     setShowForm(true);
   };
 
-  const handleDeleteEmployee = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this employee?')) {
-      return;
-    }
+  const handleDeleteEmployee = (id: string) => {
+    setDeleteId(id);
+  };
 
+  const confirmDeleteEmployee = async () => {
+    if (!deleteId) return;
     try {
-      await employeeApi.delete(id);
+      await employeeApi.delete(deleteId);
+      setDeleteId(null);
       loadEmployees();
+      toast.success('Employee deleted successfully!');
     } catch (err) {
       setError('Failed to delete employee. Please try again.');
+      setDeleteId(null);
       console.error('Error deleting employee:', err);
     }
   };
@@ -169,6 +176,15 @@ export default function Home() {
           />
         )}
       </AnimatePresence>
+      <ConfirmModal
+        open={!!deleteId}
+        title="Delete Employee"
+        description="Are you sure you want to delete this employee? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteEmployee}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }

@@ -4,10 +4,11 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const path = params.path.join('/');
+    const { path: pathSegments } = await params;
+    const path = pathSegments.join('/');
     const url = new URL(request.url);
     const queryString = url.search;
     
@@ -32,10 +33,11 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const path = params.path.join('/');
+    const { path: pathSegments } = await params;
+    const path = pathSegments.join('/');
     const body = await request.json();
     
     const response = await fetch(`${API_BASE_URL}/api/v1/${path}`, {
@@ -60,10 +62,11 @@ export async function POST(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const path = params.path.join('/');
+    const { path: pathSegments } = await params;
+    const path = pathSegments.join('/');
     const body = await request.json();
     
     const response = await fetch(`${API_BASE_URL}/api/v1/${path}`, {
@@ -88,10 +91,11 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const path = params.path.join('/');
+    const { path: pathSegments } = await params;
+    const path = pathSegments.join('/');
     
     const response = await fetch(`${API_BASE_URL}/api/v1/${path}`, {
       method: 'DELETE',

@@ -111,6 +111,8 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
     }
   }, [employee, dropdownsLoaded, departments, titles, locations, reset]);
 
+  const [emailError, setEmailError] = useState<string | null>(null);
+
   /**
    * Handle form submission for both create and update operations
    * - Cleans and prepares data
@@ -118,6 +120,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
    * - Handles API errors and logs for debugging
    */
   const onSubmit = async (data: EmployeeFormData) => {
+    setEmailError(null); // Reset email error on submit
     try {
       // Clean up the data before sending to API
       const cleanData = {
@@ -141,17 +144,29 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
         if (cleanData.salary !== employee.salary) updateData.salary = cleanData.salary;
         if (cleanData.manager !== employee.manager) updateData.manager = cleanData.manager || undefined;
         
-        await employeeApi.update(employee.id, updateData);
+        const result = await employeeApi.update(employee.id, updateData);
+        if ('error' in result) {
+          setEmailError(result.error as string);
+          return;
+        }
         toast.success('Employee updated successfully!');
       } else {
         // CREATE OPERATION: Send all required fields
-        await employeeApi.create(cleanData as CreateEmployeeDto);
+        const result = await employeeApi.create(cleanData as CreateEmployeeDto);
+        if ('error' in result) {
+          setEmailError(result.error as string);
+          return;
+        }
         toast.success('Employee added successfully!');
       }
       onSuccess();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
+      // Handle other API errors
       console.error('Error saving employee:', error);
+      if (error?.response?.data?.message) {
+        setEmailError(error.response.data.message);
+      }
       // Log the data being sent for debugging
       if (employee) {
         // Reconstruct updateData for logging purposes
@@ -234,7 +249,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
                   label="Email"
                   type="email"
                   placeholder="Enter email address"
-                  error={errors.email?.message}
+                  error={emailError || errors.email?.message}
                   {...register('email')}
                 />
                 <Input

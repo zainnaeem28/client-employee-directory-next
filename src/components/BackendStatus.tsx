@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { healthApi } from '@/lib/api';
 
 interface BackendStatusProps {
@@ -7,17 +6,13 @@ interface BackendStatusProps {
 }
 
 const BackendStatus: React.FC<BackendStatusProps> = ({ className = '' }) => {
-  const [status, setStatus] = useState<'loading' | 'healthy' | 'unhealthy'>('loading');
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
 
   const checkHealth = async () => {
     try {
-      setStatus('loading');
       await healthApi.check();
-      setStatus('healthy');
       setLastCheck(new Date());
     } catch {
-      setStatus('unhealthy');
       setLastCheck(new Date());
     }
   };

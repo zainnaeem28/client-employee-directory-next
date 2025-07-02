@@ -71,12 +71,26 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
       // Clean up the data before sending
       const cleanData = {
         ...data,
-        manager: data.manager?.trim() || undefined,
+        manager: data.manager?.trim() || null, // Use null instead of undefined
         salary: Math.min(data.salary, 1000000), // Ensure salary doesn't exceed backend limit
       };
 
       if (employee) {
-        await employeeApi.update(employee.id, cleanData as UpdateEmployeeDto);
+        // For updates, only send fields that have changed or are required
+        const updateData: UpdateEmployeeDto = {};
+        
+        // Only include fields that are different from the original employee
+        if (cleanData.firstName !== employee.firstName) updateData.firstName = cleanData.firstName;
+        if (cleanData.lastName !== employee.lastName) updateData.lastName = cleanData.lastName;
+        if (cleanData.email !== employee.email) updateData.email = cleanData.email;
+        if (cleanData.phone !== employee.phone) updateData.phone = cleanData.phone;
+        if (cleanData.department !== employee.department) updateData.department = cleanData.department;
+        if (cleanData.title !== employee.title) updateData.title = cleanData.title;
+        if (cleanData.location !== employee.location) updateData.location = cleanData.location;
+        if (cleanData.salary !== employee.salary) updateData.salary = cleanData.salary;
+        if (cleanData.manager !== employee.manager) updateData.manager = cleanData.manager || undefined;
+        
+        await employeeApi.update(employee.id, updateData);
       } else {
         await employeeApi.create(cleanData as CreateEmployeeDto);
       }
@@ -84,6 +98,35 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
       onClose();
     } catch (error) {
       console.error('Error saving employee:', error);
+      // Log the data being sent for debugging
+      if (employee) {
+        // Reconstruct updateData for logging purposes
+        const updateData: UpdateEmployeeDto = {};
+        const cleanData = {
+          ...data,
+          manager: data.manager?.trim() || null,
+          salary: Math.min(data.salary, 1000000),
+        };
+        
+        if (cleanData.firstName !== employee.firstName) updateData.firstName = cleanData.firstName;
+        if (cleanData.lastName !== employee.lastName) updateData.lastName = cleanData.lastName;
+        if (cleanData.email !== employee.email) updateData.email = cleanData.email;
+        if (cleanData.phone !== employee.phone) updateData.phone = cleanData.phone;
+        if (cleanData.department !== employee.department) updateData.department = cleanData.department;
+        if (cleanData.title !== employee.title) updateData.title = cleanData.title;
+        if (cleanData.location !== employee.location) updateData.location = cleanData.location;
+        if (cleanData.salary !== employee.salary) updateData.salary = cleanData.salary;
+        if (cleanData.manager !== employee.manager) updateData.manager = cleanData.manager || undefined;
+        
+        console.log('Update data being sent:', {
+          id: employee.id,
+          originalData: employee,
+          newData: data,
+          updateData: updateData
+        });
+      } else {
+        console.log('Create data being sent:', data);
+      }
     }
   };
 

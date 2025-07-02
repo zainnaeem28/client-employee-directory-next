@@ -30,39 +30,6 @@ const BackendStatus: React.FC<BackendStatusProps> = ({ className = '' }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const getStatusIcon = () => {
-    switch (status) {
-      case 'loading':
-        return <Loader2 className="w-4 h-4 animate-spin text-blue-500" />;
-      case 'healthy':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'unhealthy':
-        return <XCircle className="w-4 h-4 text-red-500" />;
-    }
-  };
-
-  const getStatusText = () => {
-    switch (status) {
-      case 'loading':
-        return 'Checking...';
-      case 'healthy':
-        return 'API Healthy';
-      case 'unhealthy':
-        return 'API Unavailable';
-    }
-  };
-
-  const getStatusColor = () => {
-    switch (status) {
-      case 'loading':
-        return 'text-blue-600';
-      case 'healthy':
-        return 'text-green-600';
-      case 'unhealthy':
-        return 'text-red-600';
-    }
-  };
-
   const time = lastCheck ? lastCheck.toLocaleTimeString() : 'N/A';
 
   return (

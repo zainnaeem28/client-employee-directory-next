@@ -157,7 +157,7 @@ export async function DELETE(
     let data;
     try {
       data = JSON.parse(text);
-    } catch (e) {
+    } catch {
       // Not JSON, return as plain text
       return new NextResponse(text, { status: response.status });
     }

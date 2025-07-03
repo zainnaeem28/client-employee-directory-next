@@ -15,7 +15,7 @@ export interface Employee {
   createdAt: Date;
   updatedAt: Date;
   fullName?: string;
-  customAvatar?: string;
+  customAvatar?: string | null;
 }
 
 export interface CreateEmployeeDto {
@@ -28,7 +28,7 @@ export interface CreateEmployeeDto {
   location: string;
   salary: number;
   manager?: string;
-  customAvatar?: string;
+  customAvatar?: string | null;
 }
 
 export interface UpdateEmployeeDto {
@@ -42,7 +42,7 @@ export interface UpdateEmployeeDto {
   salary?: number;
   manager?: string;
   isActive?: boolean;
-  customAvatar?: string;
+  customAvatar?: string | null;
 }
 
 export interface EmployeeFilters {

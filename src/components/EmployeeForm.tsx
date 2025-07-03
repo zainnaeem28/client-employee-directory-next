@@ -23,7 +23,7 @@ const employeeSchema = z.object({
   location: z.string().min(1, 'Location is required'),
   salary: z.coerce.number().min(20000, 'Salary must be at least $20,000').max(1000000, 'Salary cannot exceed $1,000,000'),
   manager: z.string().optional(),
-  customAvatar: z.string().optional(),
+  customAvatar: z.string().nullable().optional(),
 });
 
 type EmployeeFormData = z.infer<typeof employeeSchema>;
@@ -70,7 +70,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
       location: '',
       salary: 0,
       manager: '',
-      customAvatar: '',
+      customAvatar: null,
     },
   });
 
@@ -114,15 +114,27 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
         location,
         salary: employee.salary,
         manager: employee.manager || '',
-        customAvatar: employee.customAvatar || '',
+        customAvatar: employee.customAvatar || null,
       });
       setImagePreview(employee.customAvatar || employee.avatar || null);
+      
+      // Set initial image type
+      if (employee.customAvatar) {
+        setImageType('customAvatar');
+      } else {
+        setImageType('avatar');
+      }
+      setImageChanged(false);
     }
   }, [employee, dropdownsLoaded, departments, titles, locations, reset]);
 
   const [emailError, setEmailError] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(employee?.customAvatar || employee?.avatar || null);
   const [uploading, setUploading] = useState(false);
+  
+  // Track image state and changes
+  const [imageType, setImageType] = useState<'avatar' | 'customAvatar' | null>(null);
+  const [imageChanged, setImageChanged] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -138,7 +150,9 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
         formData
       );
       setImagePreview(res.data.data.url);
-      setValue('customAvatar', res.data.data.url); // set in form
+      setValue('customAvatar', res.data.data.url);
+      setImageType('customAvatar');
+      setImageChanged(true);
     } catch (err) {
       toast.error('Image upload failed');
     }
@@ -147,7 +161,9 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
 
   const handleRemoveImage = () => {
     setImagePreview(null);
-    setValue('customAvatar', '');
+    setValue('customAvatar', null);
+    setImageType('avatar');
+    setImageChanged(true);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -160,17 +176,17 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
    * - Handles API errors and logs for debugging
    */
   const onSubmit = async (data: EmployeeFormData) => {
-    setEmailError(null); // Reset email error on submit
+    setEmailError(null);
     try {
       // Clean up the data before sending to API
       const cleanData = {
         ...data,
-        manager: data.manager?.trim() || null, // Convert empty string to null for backend
-        salary: Math.min(data.salary, 1000000), // Cap salary to prevent backend validation issues
+        manager: data.manager?.trim() || null,
+        salary: Math.min(data.salary, 1000000),
       };
 
       if (employee) {
-        // UPDATE OPERATION: Only send fields that have changed to optimize API calls
+        // UPDATE OPERATION: Only send fields that have changed
         const updateData: UpdateEmployeeDto = {};
         
         // Compare each field and only include changed values
@@ -183,7 +199,18 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
         if (cleanData.location !== employee.location) updateData.location = cleanData.location;
         if (cleanData.salary !== employee.salary) updateData.salary = cleanData.salary;
         if (cleanData.manager !== employee.manager) updateData.manager = cleanData.manager || undefined;
-        if (cleanData.customAvatar !== employee.customAvatar) updateData.customAvatar = cleanData.customAvatar || undefined;
+        
+        // SIMPLE IMAGE LOGIC: Only send image data if it was changed
+        if (imageChanged) {
+          if (imageType === 'customAvatar') {
+            // User uploaded a custom image
+            updateData.customAvatar = data.customAvatar || null;
+          } else if (imageType === 'avatar') {
+            // User removed custom image, use alphabet avatar
+            updateData.customAvatar = null;
+          }
+        }
+        // If imageChanged is false, don't send any image data at all
         
         const result = await employeeApi.update(employee.id, updateData);
         if ('error' in result) {
@@ -203,7 +230,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
       onSuccess();
       onClose();
     } catch (error: unknown) {
-      // Handle other API errors
       console.error('Error saving employee:', error);
       if (
         error &&
@@ -212,37 +238,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
         (error as AxiosError<{ message?: string }>).response?.data?.message
       ) {
         setEmailError((error as AxiosError<{ message?: string }>).response!.data!.message!);
-      }
-      // Log the data being sent for debugging
-      if (employee) {
-        // Reconstruct updateData for logging purposes
-        const updateData: UpdateEmployeeDto = {};
-        const cleanData = {
-          ...data,
-          manager: data.manager?.trim() || null,
-          salary: Math.min(data.salary, 1000000),
-          customAvatar: data.customAvatar || undefined,
-        };
-        
-        if (cleanData.firstName !== employee.firstName) updateData.firstName = cleanData.firstName;
-        if (cleanData.lastName !== employee.lastName) updateData.lastName = cleanData.lastName;
-        if (cleanData.email !== employee.email) updateData.email = cleanData.email;
-        if (cleanData.phone !== employee.phone) updateData.phone = cleanData.phone;
-        if (cleanData.department !== employee.department) updateData.department = cleanData.department;
-        if (cleanData.title !== employee.title) updateData.title = cleanData.title;
-        if (cleanData.location !== employee.location) updateData.location = cleanData.location;
-        if (cleanData.salary !== employee.salary) updateData.salary = cleanData.salary;
-        if (cleanData.manager !== employee.manager) updateData.manager = cleanData.manager || undefined;
-        if (cleanData.customAvatar !== employee.customAvatar) updateData.customAvatar = cleanData.customAvatar || undefined;
-        
-        console.log('Update data being sent:', {
-          id: employee.id,
-          originalData: employee,
-          newData: data,
-          updateData: updateData
-        });
-      } else {
-        console.log('Create data being sent:', data);
       }
     }
   };
@@ -413,7 +408,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
                 {...register('manager')}
               />
 
-              <input type="hidden" {...register('customAvatar')} />
+
 
               <div className="flex justify-end space-x-4 pt-6">
                 <Button

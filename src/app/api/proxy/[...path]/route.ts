@@ -148,8 +148,19 @@ export async function DELETE(
       return new NextResponse(null, { status: 204 });
     }
 
-    // For other responses, parse and return the JSON data
-    const data = await response.json();
+    // Check if response has content before parsing as JSON
+    const text = await response.text();
+    if (!text) {
+      // No content, just return status
+      return new NextResponse(null, { status: response.status });
+    }
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      // Not JSON, return as plain text
+      return new NextResponse(text, { status: response.status });
+    }
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error('Proxy error:', error);

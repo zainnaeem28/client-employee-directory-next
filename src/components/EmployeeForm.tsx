@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,6 +11,7 @@ import Select from './ui/Select';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
+import axios from 'axios';
 
 const employeeSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50, 'First name must be less than 50 characters'),
@@ -22,6 +23,7 @@ const employeeSchema = z.object({
   location: z.string().min(1, 'Location is required'),
   salary: z.coerce.number().min(20000, 'Salary must be at least $20,000').max(1000000, 'Salary cannot exceed $1,000,000'),
   manager: z.string().optional(),
+  customAvatar: z.string().optional(),
 });
 
 type EmployeeFormData = z.infer<typeof employeeSchema>;
@@ -36,6 +38,8 @@ interface EmployeeFormProps {
 function normalize(str: string | undefined | null) {
   return (str || '').trim().toLowerCase();
 }
+
+const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
 const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSuccess }) => {
   // State for dropdown options - load from API
@@ -53,6 +57,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
     formState: { errors, isSubmitting },
     reset,
     control,
+    setValue,
   } = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
     defaultValues: {
@@ -65,6 +70,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
       location: '',
       salary: 0,
       manager: '',
+      customAvatar: '',
     },
   });
 
@@ -108,11 +114,44 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
         location,
         salary: employee.salary,
         manager: employee.manager || '',
+        customAvatar: employee.customAvatar || '',
       });
+      setImagePreview(employee.customAvatar || employee.avatar || null);
     }
   }, [employee, dropdownsLoaded, departments, titles, locations, reset]);
 
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(employee?.customAvatar || employee?.avatar || null);
+  const [uploading, setUploading] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await axios.post(
+        `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+        formData
+      );
+      setImagePreview(res.data.data.url);
+      setValue('customAvatar', res.data.data.url); // set in form
+    } catch (err) {
+      toast.error('Image upload failed');
+    }
+    setUploading(false);
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setValue('customAvatar', '');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   /**
    * Handle form submission for both create and update operations
@@ -144,6 +183,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
         if (cleanData.location !== employee.location) updateData.location = cleanData.location;
         if (cleanData.salary !== employee.salary) updateData.salary = cleanData.salary;
         if (cleanData.manager !== employee.manager) updateData.manager = cleanData.manager || undefined;
+        if (cleanData.customAvatar !== employee.customAvatar) updateData.customAvatar = cleanData.customAvatar || undefined;
         
         const result = await employeeApi.update(employee.id, updateData);
         if ('error' in result) {
@@ -181,6 +221,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
           ...data,
           manager: data.manager?.trim() || null,
           salary: Math.min(data.salary, 1000000),
+          customAvatar: data.customAvatar || undefined,
         };
         
         if (cleanData.firstName !== employee.firstName) updateData.firstName = cleanData.firstName;
@@ -192,6 +233,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
         if (cleanData.location !== employee.location) updateData.location = cleanData.location;
         if (cleanData.salary !== employee.salary) updateData.salary = cleanData.salary;
         if (cleanData.manager !== employee.manager) updateData.manager = cleanData.manager || undefined;
+        if (cleanData.customAvatar !== employee.customAvatar) updateData.customAvatar = cleanData.customAvatar || undefined;
         
         console.log('Update data being sent:', {
           id: employee.id,
@@ -221,20 +263,64 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
         >
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-2xl font-bold text-gray-900 flex-1">
                 {employee ? 'Edit Employee' : 'Add New Employee'}
               </h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="p-2"
-              >
-                <X className="w-5 h-5" />
-              </Button>
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClose}
+                  className="p-2"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="relative w-20 h-20 flex-shrink-0">
+                  {imagePreview ? (
+                    <img
+                      src={imagePreview}
+                      alt="Avatar"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 bg-gray-100"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center border-2 border-gray-300 bg-gray-300 text-white text-3xl font-bold select-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                  )}
+                  {imagePreview && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute -top-2 -right-2 bg-white border border-red-500 text-red-500 rounded-full w-6 h-6 flex items-center justify-center"
+                      aria-label="Remove image"
+                    >
+                      ×
+                    </button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={handleImageChange}
+                    disabled={uploading}
+                    aria-label="Upload avatar"
+                  />
+                  {uploading && (
+                    <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center rounded-full">
+                      Uploading...
+                    </div>
+                  )}
+                </div>
+                <span className="text-gray-500 text-sm whitespace-nowrap">Upload an image</span>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input
                   label="First Name"
@@ -326,6 +412,8 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
                 error={errors.manager?.message}
                 {...register('manager')}
               />
+
+              <input type="hidden" {...register('customAvatar')} />
 
               <div className="flex justify-end space-x-4 pt-6">
                 <Button

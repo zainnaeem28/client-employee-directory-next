@@ -39,7 +39,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee, onEdit, onDelete 
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-4">
             <motion.img
-              src={employee.avatar}
+              src={employee.customAvatar || employee.avatar}
               alt={`${employee.firstName} ${employee.lastName}`}
               className="w-16 h-16 rounded-full object-cover"
               whileHover={{ scale: 1.1 }}

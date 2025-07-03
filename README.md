@@ -219,6 +219,29 @@ If you encounter any issues:
 - **Backend API**: [Employee Directory Backend](https://github.com/your-username/employee-directory-backend)
 - **Documentation**: [API Documentation](https://your-api-docs.com)
 
+## Image Upload & Avatar Hosting
+
+This app supports employee profile image uploads using [imgbb.com](https://imgbb.com/) as a free image hosting service.
+
+### How it works
+- When adding or editing an employee, users can upload a profile image.
+- Uploaded images are hosted on imgbb.com and the image URL is stored in the employee record.
+- If no image is uploaded, a default avatar is generated using the employee's initials (via ui-avatars.com).
+
+### Environment Variable Required
+To enable image uploads, you must set the following environment variable in your `.env.local` file:
+
+```
+NEXT_PUBLIC_IMGBB_API_KEY=your_imgbb_api_key
+```
+
+- Get your API key by signing up at [imgbb.com API](https://api.imgbb.com/).
+- Restart your dev server after adding or changing this variable.
+
+### Notes
+- The image upload feature works in both development and production.
+- If the API key is missing or invalid, image uploads will fail.
+
 ---
 
 Built with ❤️ using Next.js, React, and TypeScript 

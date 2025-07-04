@@ -1,3 +1,16 @@
+/*
+# @Author: Muhammad Zain Naeem PMP®, APMC® <zain.naeem@invozone.dev>
+# @Role: Senior Software Engineer, Designer & Writer
+# @GitHub: https://github.com/scriptsamurai28
+# @CodeStats: https://codestats.net/users/scriptsamurai28
+# @Date: July 04, 2025
+# @Version: 1.0.0
+# @Status: Production Ready ✅
+#
+# 💡 "Code is poetry written in logic"
+# 📍 Built with ❤️ in Lahore, Pakistan
+# 🎯 Turning ideas into digital reality
+*/
 import React, { useState, useEffect } from 'react';
 import { Users, DollarSign, Activity, Building2 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';

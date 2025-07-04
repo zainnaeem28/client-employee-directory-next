@@ -53,7 +53,7 @@ function normalize(str: string | undefined | null) {
   return (str || '').trim().toLowerCase();
 }
 
-const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+// Image upload is now handled server-side to keep API key secure
 
 const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSuccess }) => {
   // State for dropdown options - load from API
@@ -104,7 +104,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
         setLocations(Array.from(new Set(locationData.map(l => l.trim()))));
         setDropdownsLoaded(true);
       } catch (error) {
-        console.error('Error loading dropdown options:', error);
+        // Silent error handling for dropdown options
       }
     };
     loadDropdownOptions();
@@ -159,14 +159,15 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
     const formData = new FormData();
     formData.append('image', file);
     try {
-      const res = await axios.post(
-        `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
-        formData
-      );
-      setImagePreview(res.data.data.url);
-      setValue('customAvatar', res.data.data.url);
-      setImageType('customAvatar');
-      setImageChanged(true);
+      const res = await axios.post('/api/upload-image', formData);
+      if (res.data.success) {
+        setImagePreview(res.data.url);
+        setValue('customAvatar', res.data.url);
+        setImageType('customAvatar');
+        setImageChanged(true);
+      } else {
+        toast.error(res.data.error || 'Image upload failed');
+      }
     } catch (err) {
       toast.error('Image upload failed');
     }
@@ -244,7 +245,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
       onSuccess();
       onClose();
     } catch (error: unknown) {
-      console.error('Error saving employee:', error);
+      // Silent error handling for employee save
       if (
         error &&
         typeof error === 'object' &&

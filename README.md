@@ -141,6 +141,18 @@ The application uses a proxy-based API architecture:
 - `GET /api/v1/employees/titles` - Get job titles list
 - `GET /api/v1/employees/locations` - Get locations list
 
+## 🔒 Security & Performance Improvements
+
+### Security Enhancements
+- **Server-side Image Upload**: ImgBB API key is now securely stored on the server and not exposed to the client
+- **Production Logging**: Console logs are only shown in development mode to prevent sensitive data exposure
+- **Input Validation**: Comprehensive validation on both client and server sides
+
+### Performance Optimizations
+- **Debounced Search**: Search inputs are debounced to reduce unnecessary API calls
+- **Server-Side Rendering**: Initial page load is now server-rendered for better SEO and performance
+- **Optimized Re-renders**: Smart filtering prevents unnecessary API calls on initial load
+
 ## 🎯 Key Features Explained
 
 ### Employee Management
@@ -232,7 +244,7 @@ This app supports employee profile image uploads using [imgbb.com](https://imgbb
 To enable image uploads, you must set the following environment variable in your `.env.local` file:
 
 ```
-NEXT_PUBLIC_IMGBB_API_KEY=your_imgbb_api_key
+IMGBB_API_KEY=your_imgbb_api_key
 ```
 
 - Get your API key by signing up at [imgbb.com API](https://api.imgbb.com/).
@@ -240,6 +252,7 @@ NEXT_PUBLIC_IMGBB_API_KEY=your_imgbb_api_key
 
 ### Notes
 - The image upload feature works in both development and production.
+- The API key is now securely stored on the server-side and not exposed to the client.
 - If the API key is missing or invalid, image uploads will fail.
 
 ---

@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Users, Plus } from 'lucide-react';
@@ -5,7 +7,7 @@ import Button from './ui/Button';
 import BackendStatus from './BackendStatus';
 
 interface HeaderProps {
-  onAddEmployee: () => void;
+  onAddEmployee?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ onAddEmployee }) => {
@@ -36,14 +38,16 @@ const Header: React.FC<HeaderProps> = ({ onAddEmployee }) => {
         {/* Actions - Responsive layout */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <BackendStatus className="text-white hidden sm:block" />
-          <Button
-            onClick={onAddEmployee}
-            className="flex items-center space-x-1 sm:space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 sm:px-5 py-2 rounded-lg shadow-md text-sm sm:text-base"
-          >
-            <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Add Employee</span>
-            <span className="sm:hidden">Add</span>
-          </Button>
+          {onAddEmployee && (
+            <Button
+              onClick={onAddEmployee}
+              className="flex items-center space-x-1 sm:space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 sm:px-5 py-2 rounded-lg shadow-md text-sm sm:text-base"
+            >
+              <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Add Employee</span>
+              <span className="sm:hidden">Add</span>
+            </Button>
+          )}
         </div>
       </div>
     </motion.header>

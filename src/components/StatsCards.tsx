@@ -1,3 +1,5 @@
+'use client';
+
 /*
 # @Author: Muhammad Zain Naeem PMP®, APMC® <zain.naeem@invozone.dev>
 # @Role: Senior Software Engineer, Designer & Writer

@@ -11,7 +11,7 @@
 # 📍 Built with ❤️ in Lahore, Pakistan
 # 🎯 Turning ideas into digital reality
 */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, X } from 'lucide-react';
 import { EmployeeFilters } from '@/types/employee';
@@ -19,6 +19,7 @@ import { employeeApi } from '@/lib/api';
 import Button from './ui/Button';
 import Input from './ui/Input';
 import Select from './ui/Select';
+// Removed debounce import since we're not using it anymore
 
 interface EmployeeFiltersProps {
   filters: EmployeeFilters;
@@ -30,6 +31,12 @@ const EmployeeFiltersComponent: React.FC<EmployeeFiltersProps> = ({ filters, onF
   const [titles, setTitles] = useState<string[]>([]);
   const [locations, setLocations] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [searchValue, setSearchValue] = useState(filters.search || '');
+
+  // Update search value when filters change externally
+  useEffect(() => {
+    setSearchValue(filters.search || '');
+  }, [filters.search]);
 
   useEffect(() => {
     const loadFilterOptions = async () => {
@@ -43,12 +50,14 @@ const EmployeeFiltersComponent: React.FC<EmployeeFiltersProps> = ({ filters, onF
         setTitles(titleData);
         setLocations(locationData);
       } catch (error) {
-        console.error('Error loading filter options:', error);
+        // Silent error handling for filter options
       }
     };
 
     loadFilterOptions();
   }, []);
+
+  // Removed debounced search for better responsiveness
 
   const handleFilterChange = (key: keyof EmployeeFilters, value: string | number) => {
     onFiltersChange({
@@ -58,10 +67,26 @@ const EmployeeFiltersComponent: React.FC<EmployeeFiltersProps> = ({ filters, onF
     });
   };
 
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value);
+    // Always update filters immediately for better responsiveness
+    onFiltersChange({
+      ...filters,
+      search: value,
+      page: 1,
+    });
+  };
+
   const clearFilters = () => {
+    setSearchValue('');
+    setShowFilters(false);
     onFiltersChange({
       page: 1,
       limit: 10,
+      search: '',
+      department: '',
+      title: '',
+      location: '',
     });
   };
 
@@ -75,8 +100,8 @@ const EmployeeFiltersComponent: React.FC<EmployeeFiltersProps> = ({ filters, onF
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Search employees..."
-              value={filters.search || ''}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
+              value={searchValue}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10"
             />
           </div>

@@ -13,6 +13,7 @@ import Button from '@/components/ui/Button';
 import Header from '@/components/Header';
 import ConfirmModal from '@/components/ConfirmModal';
 import toast from 'react-hot-toast';
+import StatsCards from '@/components/StatsCards';
 
 export default function Home() {
   const [employees, setEmployees] = useState<PaginatedEmployees | null>(null);
@@ -93,6 +94,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <Header onAddEmployee={handleAddEmployee} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <StatsCards />
         <EmployeeFiltersComponent
           filters={filters}
           onFiltersChange={handleFiltersChange}

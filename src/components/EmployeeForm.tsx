@@ -245,7 +245,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 bg-blue-900/60 backdrop-blur-md flex items-center justify-center p-4 z-50"
+        className="fixed inset-0 bg-gradient-to-br from-blue-900/80 via-blue-800/70 to-blue-900/90 backdrop-blur-xl flex items-center justify-center p-4 z-50"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -407,8 +407,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
                 error={errors.manager?.message}
                 {...register('manager')}
               />
-
-
 
               <div className="flex justify-end space-x-4 pt-6">
                 <Button

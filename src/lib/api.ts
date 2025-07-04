@@ -145,6 +145,15 @@ export const employeeApi = {
     const response = await api.get('/employees/locations');
     return response.data;
   },
+
+  /**
+   * Get employee statistics for dashboard
+   * @returns Promise with employee statistics data
+   */
+  getStats: async () => {
+    const response = await api.get('/employees/stats');
+    return response.data;
+  },
 };
 
 /**

@@ -11,11 +11,11 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onAddEmployee }) => {
   return (
     <motion.header
-      className="w-full sticky top-0 z-50 backdrop-blur-md bg-gradient-to-r from-blue-500/70 via-blue-400/60 to-blue-600/70 shadow-lg border-b border-blue-200/30"
+      className="w-full sticky top-0 z-50 bg-gradient-to-br from-blue-700/70 via-blue-500/60 to-blue-800/80 backdrop-blur-xl shadow-lg border-b border-blue-200/40"
       initial={{ y: -60, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      style={{ WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)' }}
+      style={{ WebkitBackdropFilter: 'blur(16px)', backdropFilter: 'blur(16px)' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
         {/* Branding - Responsive layout */}

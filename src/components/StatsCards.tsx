@@ -25,10 +25,10 @@ const mockStats = {
 };
 
 const glassyCard =
-  'relative z-0 rounded-xl shadow-lg px-4 py-3 flex flex-row items-center justify-between bg-gradient-to-br from-blue-400/80 via-blue-600/60 to-blue-800/30 backdrop-blur-xl border border-blue-200/40 min-h-[110px] max-h-[110px] min-w-[260px] overflow-hidden group transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/20 hover:border-blue-300/60';
+  'relative z-0 rounded-xl shadow-lg px-4 py-3 flex flex-row items-center justify-between bg-gradient-to-br from-blue-400/80 via-blue-600/60 to-blue-800/80 backdrop-blur-xl border border-blue-200/40 min-h-[110px] max-h-[110px] min-w-[260px] overflow-hidden group transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/20 hover:border-blue-300/60';
 
 const glassyCardNoOverflow =
-  'relative z-0 rounded-xl shadow-lg px-4 py-3 flex flex-row items-center justify-between bg-gradient-to-br from-blue-400/80 via-blue-600/60 to-blue-800/30 backdrop-blur-xl border border-blue-200/40 min-h-[110px] max-h-[110px] min-w-[260px] group transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/20 hover:border-blue-300/60';
+  'relative z-0 rounded-xl shadow-lg px-4 py-3 flex flex-row items-center justify-between bg-gradient-to-br from-blue-400/80 via-blue-600/60 to-blue-800/80 backdrop-blur-xl border border-blue-200/40 min-h-[110px] max-h-[110px] min-w-[260px] group transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/20 hover:border-blue-300/60';
 
 const glassyTooltip =
   'backdrop-blur-md bg-blue-900/80 border border-blue-300/30 text-white text-sm rounded-md px-6 py-2 shadow-lg';
@@ -37,13 +37,15 @@ const iconBg =
   'p-2 rounded-lg bg-white/20 flex items-center justify-center shadow-sm transition-all duration-300 group-hover:bg-white/30 group-hover:scale-110';
 
 const iconStyles = {
-  users: 'text-blue-400',
+  users: 'text-blue-800',
   dollar: 'text-green-400',
-  activity: 'text-orange-400',
+  activity: 'text-orange-600',
   building: 'text-green-400',
 };
 
-const COLORS = ['#60A5FA', '#A78BFA', '#F472B6', '#FBBF24', '#34D399'];
+const COLORS = ['#0073FF', '#5926F1', '#F472B6', '#F8BA1C', '#0CD98E'];
+
+
 
 interface TooltipPayload {
   payload: {

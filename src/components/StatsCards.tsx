@@ -45,7 +45,15 @@ const iconStyles = {
 
 const COLORS = ['#60A5FA', '#A78BFA', '#F472B6', '#FBBF24', '#34D399'];
 
-const CustomTooltip = ({ active, payload, coordinate }: { active?: boolean; payload?: any[]; coordinate?: { x: number; y: number } }) => {
+interface TooltipPayload {
+  payload: {
+    name?: string;
+    title?: string;
+    value: number;
+  };
+}
+
+const CustomTooltip = ({ active, payload, coordinate }: { active?: boolean; payload?: TooltipPayload[]; coordinate?: { x: number; y: number } }) => {
   if (active && payload && payload.length && coordinate) {
     const entry = payload[0].payload;
     // Use absolute positioning relative to the card
@@ -103,12 +111,12 @@ const StatsCards: React.FC = () => {
   }, []);
 
   const { totalEmployees, departments, topLocation, averageSalary, activeEmployees, jobTitleTrends, locations } = stats;
-  const activePercent = Math.round((activeEmployees.active / activeEmployees.total) * 100);
-  const topJob = jobTitleTrends.reduce((a, b) => (a.value > b.value ? a : b), jobTitleTrends[0]);
+  const activePercent = activeEmployees && activeEmployees.total > 0 ? Math.round((activeEmployees.active / activeEmployees.total) * 100) : 0;
+  const topJob = jobTitleTrends && jobTitleTrends.length > 0 ? jobTitleTrends.reduce((a, b) => (a.value > b.value ? a : b), jobTitleTrends[0]) : { title: 'N/A', value: 0 };
 
   // Show only top 8 locations, group the rest as 'Other' if needed
   const MAX_LOCATIONS = 8;
-  let pieLocations = locations;
+  let pieLocations = locations || [];
   if (locations && locations.length > MAX_LOCATIONS) {
     // Sort by value descending
     const sorted = [...locations].sort((a, b) => b.value - a.value);
@@ -152,7 +160,7 @@ const StatsCards: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out rounded-xl overflow-hidden pointer-events-none"></div>
         <div className="flex flex-col gap-1 relative z-10">
           <span className="text-base font-semibold text-white/90">Total Employees</span>
-          <span className="text-2xl font-extrabold text-white">{totalEmployees}</span>
+          <span className="text-2xl font-extrabold text-white">{totalEmployees || 0}</span>
         </div>
         <div className={iconBg}><Users className={`w-8 h-8 ${iconStyles.users}`} /></div>
       </div>
@@ -163,7 +171,7 @@ const StatsCards: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out rounded-xl overflow-hidden pointer-events-none"></div>
         <div className="flex flex-col gap-1 relative z-10">
           <span className="text-base font-semibold text-white/90">Departments</span>
-          <span className="text-2xl font-extrabold text-white">{departments}</span>
+          <span className="text-2xl font-extrabold text-white">{departments || 0}</span>
         </div>
         <div className={iconBg}><Building2 className={`w-8 h-8 ${iconStyles.building}`} /></div>
       </div>
@@ -174,8 +182,8 @@ const StatsCards: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out rounded-xl overflow-hidden pointer-events-none"></div>
         <div className="flex flex-col gap-1 relative z-10">
           <span className="text-base font-semibold text-white/90">Top Location</span>
-          <span className="text-lg font-bold text-white">{topLocation.name} <span className="text-blue-200 font-normal">({topLocation.count})</span></span>
-          <span className="text-base font-bold text-white mt-1">{topLocation.percent}%</span>
+          <span className="text-lg font-bold text-white">{topLocation?.name || 'N/A'} <span className="text-blue-200 font-normal">({topLocation?.count || 0})</span></span>
+          <span className="text-base font-bold text-white mt-1">{topLocation?.percent || 0}%</span>
         </div>
         <div style={{ width: 84, height: 84, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="relative z-10">
           <ResponsiveContainer width="100%" height="100%">
@@ -209,7 +217,9 @@ const StatsCards: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out rounded-xl overflow-hidden pointer-events-none"></div>
         <div className="flex flex-col gap-1 relative z-10">
           <span className="text-base font-semibold text-white/90 mt-1">Average Salary</span>
-          <span className="text-2xl font-extrabold text-white">${averageSalary.toLocaleString()}</span>
+          <span className="text-2xl font-extrabold text-white">
+            {averageSalary != null && averageSalary > 0 ? `$${averageSalary.toLocaleString()}` : 'N/A'}
+          </span>
           <span className="text-xs text-blue-100/80 mt-1">per year</span>
         </div>
         <div className={iconBg}><DollarSign className={`w-8 h-8 ${iconStyles.dollar}`} /></div>
@@ -221,7 +231,7 @@ const StatsCards: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out rounded-xl overflow-hidden pointer-events-none"></div>
         <div className="flex flex-col gap-1 w-full pr-4 relative z-10">
           <span className="text-base font-semibold text-white/90">Active Employees</span>
-          <span className="text-2xl font-extrabold text-white">{activeEmployees.active}</span>
+          <span className="text-2xl font-extrabold text-white">{activeEmployees?.active || 0}</span>
           <div className="relative w-full mt-2">
             <div
               className="w-full bg-blue-100/20 rounded-full h-2 group"
@@ -250,7 +260,7 @@ const StatsCards: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out rounded-xl overflow-hidden pointer-events-none"></div>
         <div className="flex flex-col gap-1 relative z-10">
           <span className="text-base font-semibold text-white/90">Top Job Title</span>
-          <span className="text-lg font-bold text-white">{topJob.title} <span className="text-blue-200 font-normal">({topJob.value})</span></span>
+          <span className="text-lg font-bold text-white">{topJob.title || 'N/A'} <span className="text-blue-200 font-normal">({topJob.value || 0})</span></span>
           <span className="text-xs text-blue-100/80 mt-1">see breakdown</span>
         </div>
         <div style={{ width: 84, height: 84, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="relative z-10">
@@ -294,7 +304,7 @@ const StatsCards: React.FC = () => {
           }}
           className={'backdrop-blur-md border border-blue-200/30 text-white text-sm rounded-md px-6 py-2 shadow-lg text-center'}
         >
-          {`${activeEmployees.active} / ${activeEmployees.total} active employees`}
+          {`${activeEmployees?.active || 0} / ${activeEmployees?.total || 0} active employees`}
         </div>
       )}
     </div>

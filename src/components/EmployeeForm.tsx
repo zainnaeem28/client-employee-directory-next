@@ -12,6 +12,7 @@ import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 import axios from 'axios';
+import Image from 'next/image';
 
 const employeeSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50, 'First name must be less than 50 characters'),
@@ -277,6 +278,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onClose, onSucces
               <div className="flex items-center gap-4">
                 <div className="relative w-20 h-20 flex-shrink-0">
                   {imagePreview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={imagePreview}
                       alt="Avatar"
